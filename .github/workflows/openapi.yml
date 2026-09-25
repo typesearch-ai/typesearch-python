@@ -1,0 +1,22 @@
+# Once a week, compares the generated models with the live OpenAPI of the API. If the API changed, this
+# fails: run `python scripts/generate_models.py --fetch`, review the diff and release.
+name: OpenAPI drift
+
+on:
+  schedule:
+    - cron: '17 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.13'
+      - run: python scripts/generate_models.py --fetch
+      - run: git diff --stat --exit-code -- openapi src/typesearch/_models.py src/typesearch/_params.py

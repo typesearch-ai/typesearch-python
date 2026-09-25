@@ -1,0 +1,312 @@
+from __future__ import annotations
+
+import time
+from types import TracebackType
+from typing import Any, Dict, Mapping, Optional, Sequence, Type, TypeVar, Union, overload
+
+import httpx
+from pydantic import BaseModel
+from typing_extensions import Unpack
+
+from ._base import (
+    DEFAULT_MAX_RETRIES,
+    DEFAULT_POLL_INTERVAL,
+    DEFAULT_TIMEOUT,
+    DEFAULT_WAIT_TIMEOUT,
+    BaseClient,
+    as_list,
+    body,
+    job_path,
+    retry_delay,
+    should_retry,
+    sources_path,
+)
+from ._construct import construct
+from ._errors import (
+    APIConnectionError,
+    APIError,
+    APITimeoutError,
+    JobFailedError,
+    TypesearchError,
+    error_from_response,
+    retry_after_seconds,
+)
+from ._models import ContentsResponse, Job, SearchResponse, Source, Sources, Usage
+from ._params import ContentsOptions, SearchOptions, SimilarOptions, SiteSearchOptions
+from ._streaming import SearchStream
+
+M = TypeVar("M", bound=BaseModel)
+
+
+class Typesearch(BaseClient):
+    """The typesearch API client.
+
+    >>> from typesearch import Typesearch
+    >>> ts = Typesearch()  # reads TYPESEARCH_API_KEY
+    >>> res = ts.search("el dólar", mode="fast", max_results=5)
+    >>> for r in res.results:
+    ...     print(f"{r.score:.2f}", r.title, r.source)
+    """
+
+    jobs: Jobs
+    """Live site search jobs: ``get()`` and ``wait()``."""
+
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        *,
+        base_url: Optional[str] = None,
+        timeout: float = DEFAULT_TIMEOUT,
+        max_retries: int = DEFAULT_MAX_RETRIES,
+        default_headers: Optional[Mapping[str, str]] = None,
+        http_client: Optional[httpx.Client] = None,
+    ) -> None:
+        """
+        Args:
+            api_key: Your key. Defaults to the ``TYPESEARCH_API_KEY`` environment variable.
+            base_url: Defaults to ``TYPESEARCH_BASE_URL``, or ``https://api.typesearch.ai``.
+            timeout: Seconds before a request is aborted. A ``deep`` search can take about a minute.
+            max_retries: Retries on connection errors, ``429 rate_limited`` and ``5xx``.
+            default_headers: Headers sent with every request.
+            http_client: Your own ``httpx.Client``, for proxies or tests. You close it.
+        """
+        super().__init__(api_key, base_url, timeout, max_retries, default_headers)
+        self._owns_http = http_client is None
+        self._http = http_client or httpx.Client()
+        self.jobs = Jobs(self)
+
+    # --- Endpoints -----------------------------------------------------------------------
+
+    def search(
+        self,
+        query: Union[str, Sequence[str]],
+        *,
+        timeout: Optional[float] = None,
+        max_retries: Optional[int] = None,
+        extra_headers: Optional[Mapping[str, str]] = None,
+        **options: Unpack[SearchOptions],
+    ) -> SearchResponse:
+        """Searches the index: one query, or up to five judged together (results merged, plus one entry per
+        query in ``groups``). Every result has a calibrated ``score``.
+
+        Keyword arguments have the same names as the HTTP API: https://typesearch.ai/docs/api-reference/search.
+        ``days=None`` searches the whole index; leaving ``days`` out keeps the default of 7.
+        """
+        data = body({"query": query if isinstance(query, str) else list(query)}, options)
+        return self._post("/v1/search", data, SearchResponse, timeout, max_retries, extra_headers)
+
+    def search_stream(
+        self,
+        query: Union[str, Sequence[str]],
+        *,
+        timeout: Optional[float] = None,
+        max_retries: Optional[int] = None,
+        extra_headers: Optional[Mapping[str, str]] = None,
+        **options: Unpack[SearchOptions],
+    ) -> SearchStream:
+        """The same search as a stream of events: ``step``, ``partial`` (results so far) and ``result``.
+
+        The request starts when you start iterating. See https://typesearch.ai/docs/guides/streaming.
+        """
+        data = body({"query": query if isinstance(query, str) else list(query)}, options)
+        data["stream"] = True
+        return SearchStream(lambda: self._send("POST", "/v1/search", data, True, timeout, max_retries, extra_headers))
+
+    def similar(
+        self,
+        url: str,
+        *,
+        timeout: Optional[float] = None,
+        max_retries: Optional[int] = None,
+        extra_headers: Optional[Mapping[str, str]] = None,
+        **options: Unpack[SimilarOptions],
+    ) -> SearchResponse:
+        """Articles in the index about the same story as a URL. The response has the shape of a search, with
+        the reference article in ``reference``."""
+        return self._post("/v1/similar", body({"url": url}, options), SearchResponse, timeout, max_retries, extra_headers)
+
+    def contents(
+        self,
+        urls: Union[str, Sequence[str]],
+        *,
+        timeout: Optional[float] = None,
+        max_retries: Optional[int] = None,
+        extra_headers: Optional[Mapping[str, str]] = None,
+        **options: Unpack[ContentsOptions],
+    ) -> ContentsResponse:
+        """Metadata and a short verbatim excerpt of up to 10 URLs — never the full text. With ``query``, the
+        excerpt about it and each page's ``relevance``. Each URL has its own ``status``."""
+        return self._post("/v1/contents", body({"urls": as_list(urls)}, options), ContentsResponse, timeout, max_retries, extra_headers)
+
+    def site_search(
+        self,
+        site: str,
+        query: str,
+        *,
+        timeout: Optional[float] = None,
+        max_retries: Optional[int] = None,
+        extra_headers: Optional[Mapping[str, str]] = None,
+        **options: Unpack[SiteSearchOptions],
+    ) -> Job:
+        """Searches a live site: its homepage, its sections and its own search box. It can take up to a minute,
+        so it returns a job: wait for it with ``jobs.wait()``, or use :meth:`site_search_and_wait`."""
+        return self._post("/v1/search/site", body({"site": site, "query": query}, options), Job, timeout, max_retries, extra_headers)
+
+    def site_search_and_wait(
+        self,
+        site: str,
+        query: str,
+        *,
+        poll_interval: float = DEFAULT_POLL_INTERVAL,
+        wait_timeout: float = DEFAULT_WAIT_TIMEOUT,
+        timeout: Optional[float] = None,
+        max_retries: Optional[int] = None,
+        extra_headers: Optional[Mapping[str, str]] = None,
+        **options: Unpack[SiteSearchOptions],
+    ) -> SearchResponse:
+        """:meth:`site_search`, then waits for the job and returns its result. Raises :class:`JobFailedError`
+        if the job fails, and :class:`APITimeoutError` if it takes longer than ``wait_timeout`` seconds."""
+        job = self.site_search(site, query, timeout=timeout, max_retries=max_retries, extra_headers=extra_headers, **options)
+        return self.jobs.wait(job.id, poll_interval=poll_interval, timeout=wait_timeout)
+
+    def site_search_stream(
+        self,
+        site: str,
+        query: str,
+        *,
+        timeout: Optional[float] = None,
+        max_retries: Optional[int] = None,
+        extra_headers: Optional[Mapping[str, str]] = None,
+        **options: Unpack[SiteSearchOptions],
+    ) -> SearchStream:
+        """A live site search as a stream of events, instead of a job."""
+        data = body({"site": site, "query": query}, options)
+        data["stream"] = True
+        return SearchStream(lambda: self._send("POST", "/v1/search/site", data, True, timeout, max_retries, extra_headers))
+
+    @overload
+    def sources(self, *, timeout: Optional[float] = None, extra_headers: Optional[Mapping[str, str]] = None) -> Sources: ...
+
+    @overload
+    def sources(self, *, domain: str, timeout: Optional[float] = None, extra_headers: Optional[Mapping[str, str]] = None) -> Source: ...
+
+    def sources(
+        self,
+        *,
+        domain: Optional[str] = None,
+        timeout: Optional[float] = None,
+        extra_headers: Optional[Mapping[str, str]] = None,
+    ) -> Union[Sources, Source]:
+        """The coverage of the index in aggregate: sources and articles, by country and by language.
+
+        With ``domain``, whether that domain is covered and, when it is, its name, country, languages and articles.
+        """
+        model: Type[Union[Sources, Source]] = Sources if domain is None else Source
+        return self._get(sources_path(domain), model, timeout, extra_headers)
+
+    def usage(self, *, timeout: Optional[float] = None, extra_headers: Optional[Mapping[str, str]] = None) -> Usage:
+        """Usage today and over the last 30 days, the limits of this key, its credit and the price list."""
+        return self._get("/v1/usage", Usage, timeout, extra_headers)
+
+    # --- Lifecycle -----------------------------------------------------------------------
+
+    def close(self) -> None:
+        """Closes the connections, unless you passed your own ``http_client``."""
+        if self._owns_http:
+            self._http.close()
+
+    def __enter__(self) -> Typesearch:
+        return self
+
+    def __exit__(self, exc_type: Optional[Type[BaseException]], exc: Optional[BaseException], tb: Optional[TracebackType]) -> None:
+        self.close()
+
+    # --- Transport -----------------------------------------------------------------------
+
+    def _get(self, path: str, model: Type[M], timeout: Optional[float] = None, extra_headers: Optional[Mapping[str, str]] = None) -> M:
+        return self._parse(self._send("GET", path, None, False, timeout, None, extra_headers), model)
+
+    def _post(
+        self,
+        path: str,
+        data: Dict[str, Any],
+        model: Type[M],
+        timeout: Optional[float],
+        max_retries: Optional[int],
+        extra_headers: Optional[Mapping[str, str]],
+    ) -> M:
+        return self._parse(self._send("POST", path, data, False, timeout, max_retries, extra_headers), model)
+
+    @staticmethod
+    def _parse(response: httpx.Response, model: Type[M]) -> M:
+        try:
+            return construct(model, response.json())
+        except ValueError:
+            raise TypesearchError(
+                f"The API answered {response.request.method} {response.request.url.path} with a body that is not JSON."
+            ) from None
+
+    def _send(
+        self,
+        method: str,
+        path: str,
+        data: Optional[Dict[str, Any]],
+        stream: bool,
+        timeout: Optional[float],
+        max_retries: Optional[int],
+        extra_headers: Optional[Mapping[str, str]],
+    ) -> httpx.Response:
+        retries = self.max_retries if max_retries is None else max_retries
+        attempt = 0
+        while True:
+            wait: Optional[float] = None
+            request = self._build(self._http, method, path, data, stream, timeout, extra_headers)
+            try:
+                response = self._http.send(request, stream=stream)
+            except httpx.TimeoutException as e:
+                error: TypesearchError = APITimeoutError(f"Request timed out after {self.timeout if timeout is None else timeout} s.")
+                error.__cause__ = e
+            except httpx.TransportError as e:
+                error = APIConnectionError()
+                error.__cause__ = e
+            else:
+                if response.is_success:
+                    return response
+                try:
+                    response.read()
+                finally:
+                    response.close()
+                api_error: APIError = error_from_response(response)
+                if not should_retry(response.status_code, api_error.code):
+                    raise api_error
+                error, wait = api_error, retry_after_seconds(response.headers)
+            if attempt >= retries:
+                raise error
+            time.sleep(retry_delay(attempt, wait))
+            attempt += 1
+
+
+class Jobs:
+    """Live site search jobs."""
+
+    def __init__(self, client: Typesearch) -> None:
+        self._client = client
+
+    def get(self, job_id: str) -> Job:
+        """A job's status and, when it succeeded, its ``result``. Jobs last one day and are only visible to the
+        key that created them."""
+        return self._client._get(job_path(job_id), Job)
+
+    def wait(self, job_id: str, *, poll_interval: float = DEFAULT_POLL_INTERVAL, timeout: float = DEFAULT_WAIT_TIMEOUT) -> SearchResponse:
+        """Polls a job until it finishes and returns its result. Raises :class:`JobFailedError` if it fails, and
+        :class:`APITimeoutError` if it does not finish within ``timeout`` seconds."""
+        deadline = time.monotonic() + timeout
+        while True:
+            job = self.get(job_id)
+            if job.status == "succeeded" and job.result is not None:
+                return job.result
+            if job.status == "failed":
+                raise JobFailedError(job)
+            if time.monotonic() + poll_interval > deadline:
+                raise APITimeoutError(f"Job {job_id} did not finish in time (last status: {job.status}).")
+            time.sleep(poll_interval)
