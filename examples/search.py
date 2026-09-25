@@ -13,7 +13,7 @@ query = sys.argv[1] if len(sys.argv) > 1 else "inflation"
 with Typesearch() as ts:  # reads TYPESEARCH_API_KEY
     res = ts.search(
         query,
-        mode="fast",  # cheapest and ~1 s; "normal" reads the top results before ranking them
+        mode="fast",  # ~1 s; "ultra" (headlines only) costs less, "normal" reads the top results before ranking them
         max_results=5,
         days=3,
         # include_domains=["diarioejemplo.example"],
