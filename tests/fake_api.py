@@ -49,6 +49,8 @@ def result(n: int, **extra: Any) -> Dict[str, Any]:
         "url": f"https://diarioejemplo.example/economia/nota-{n}",
         "title": f"El dólar cerró estable por {n}ª rueda",
         "source": "Diario Ejemplo",
+        "country": "AR",
+        "language": "es",
         "published_at": "2026-09-21T18:05:00.000Z",
         "section": "economia",
         "snippet": "La divisa se mantuvo sin cambios frente al cierre anterior.",

@@ -13,6 +13,8 @@ First release.
 - Response models (pydantic) and typed keyword arguments (`TypedDict`) generated from the API's OpenAPI
   document. Responses are built without validation and keep unknown fields, so a newer API never breaks
   this version.
+- `countries` and `languages` filters in `search`, `search_stream` and `similar`; every result carries the
+  `country` and `language` of its source.
 - Automatic retries with exponential backoff and jitter for connection errors, timeouts, `429 rate_limited`
   and `5xx`, honouring `Retry-After`; `quota_exceeded` is never retried.
 - Per-call `timeout`, `max_retries` and `extra_headers`.

@@ -1,4 +1,4 @@
-# Generado por scripts/generate_models.py desde el OpenAPI de la API (1.0.0, a3cea60b7c89).
+# Generado por scripts/generate_models.py desde el OpenAPI de la API (1.0.0, 336df2c4e996).
 # No editar a mano: `python scripts/generate_models.py` (con --fetch trae el vivo).
 """Response models of the typesearch API, generated from its OpenAPI document."""
 
@@ -133,6 +133,10 @@ class Result(_Model):
     """The headline."""
     source: Optional[str]
     """The outlet that published it."""
+    country: Optional[str]
+    """Country of the source (ISO 3166-1 alpha-2), when known."""
+    language: Optional[str]
+    """Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one."""
     published_at: Optional[str]
     """Publication date-time (ISO 8601, UTC), when known."""
     section: Optional[str]
@@ -494,7 +498,7 @@ class RequestPricing(_Model):
     deep: float
     similar: float
     similar_deep: float
-    """Similar in deep mode, which reads eight articles with highlights (on Exa: findSimilar plus text and highlights for eight pages)."""
+    """Similar in deep mode, which reads eight articles and returns highlights."""
     site_search: float
 
 

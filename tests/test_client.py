@@ -99,6 +99,12 @@ def test_several_queries_days_none_dates_and_questions(api: FakeApi, ts: Typesea
     assert res.queries == ["el dólar", "el FMI"]
 
 
+def test_countries_and_languages_filter_the_sources_and_each_result_says_its_own(api: FakeApi, ts: Typesearch) -> None:
+    res = ts.search("inflación", countries=["AR", "UY"], languages=("es",))
+    assert api.last.body == {"query": "inflación", "countries": ["AR", "UY"], "languages": ["es"]}
+    assert (res.results[0].country, res.results[0].language) == ("AR", "es")
+
+
 def test_a_datetime_without_time_zone_is_refused_before_sending(api: FakeApi, ts: Typesearch) -> None:
     with pytest.raises(ValueError, match="time zone"):
         ts.search("el dólar", published_after=dt.datetime(2026, 9, 20, 10, 0))
@@ -125,6 +131,8 @@ def test_similar(api: FakeApi, ts: Typesearch) -> None:
     }
     assert res.object == "similar"
     assert res.reference is not None and res.reference.url == "https://diarioejemplo.example/economia/nota"
+    ts.similar("https://diarioejemplo.example/economia/nota", countries=["AR"], languages=["es"])
+    assert api.last.body == {"url": "https://diarioejemplo.example/economia/nota", "countries": ["AR"], "languages": ["es"]}
 
 
 def test_contents_with_a_list_or_one_url(api: FakeApi, ts: Typesearch) -> None:

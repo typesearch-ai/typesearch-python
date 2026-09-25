@@ -1,4 +1,4 @@
-# Generado por scripts/generate_models.py desde el OpenAPI de la API (1.0.0, a3cea60b7c89).
+# Generado por scripts/generate_models.py desde el OpenAPI de la API (1.0.0, 336df2c4e996).
 # No editar a mano: `python scripts/generate_models.py` (con --fetch trae el vivo).
 """Request options of the typesearch API, generated from its OpenAPI document."""
 
@@ -36,7 +36,7 @@ NULLABLE: FrozenSet[str] = frozenset({"days", "max_tokens"})
 
 
 Mode = Literal["ultra", "fast", "normal", "deep"]
-"""ultra: headlines only · fast: headlines and standfirsts (these two cost the least, the same) · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short."""
+"""ultra: headlines only, the cheapest · fast: headlines and standfirsts · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short."""
 
 
 class SearchOptions(TypedDict, total=False):
@@ -48,6 +48,10 @@ class SearchOptions(TypedDict, total=False):
     """Only these domains or paths. A domain includes its subdomains. At most 20 items."""
     exclude_domains: NotRequired[Sequence[str]]
     """Never these domains or paths. At most 20 items."""
+    countries: NotRequired[Sequence[str]]
+    """Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. GET /v1/sources tells how many sources each country has. 1–50 items."""
+    languages: NotRequired[Sequence[str]]
+    """Only sources that publish in these languages: ISO 639-1 codes, such as es or en (a BCP 47 tag such as pt-BR counts as pt). 1–20 items."""
     sections: NotRequired[Sequence[str]]
     """Only these sections: the section in the feed, or the start of the URL path. At most 20 items."""
     days: NotRequired[Optional[int]]
@@ -57,7 +61,7 @@ class SearchOptions(TypedDict, total=False):
     published_before: NotRequired[DateLike]
     """Published on or before this date; a bare date includes that whole day."""
     mode: NotRequired[Mode]
-    """ultra: headlines only · fast: headlines and standfirsts (these two cost the least, the same) · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short. Defaults to ``"normal"``."""
+    """ultra: headlines only, the cheapest · fast: headlines and standfirsts · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short. Defaults to ``"normal"``."""
     max_results: NotRequired[int]
     """1–50. Defaults to ``10``."""
     highlights: NotRequired[bool]
@@ -113,6 +117,10 @@ class SimilarOptions(TypedDict, total=False):
     """Only these domains or paths. A domain includes its subdomains. At most 20 items."""
     exclude_domains: NotRequired[Sequence[str]]
     """Never these domains or paths. At most 20 items."""
+    countries: NotRequired[Sequence[str]]
+    """Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. GET /v1/sources tells how many sources each country has. 1–50 items."""
+    languages: NotRequired[Sequence[str]]
+    """Only sources that publish in these languages: ISO 639-1 codes, such as es or en (a BCP 47 tag such as pt-BR counts as pt). 1–20 items."""
     sections: NotRequired[Sequence[str]]
     """Only these sections: the section in the feed, or the start of the URL path. At most 20 items."""
     days: NotRequired[Optional[int]]
@@ -122,7 +130,7 @@ class SimilarOptions(TypedDict, total=False):
     published_before: NotRequired[DateLike]
     """Published on or before this date; a bare date includes that whole day."""
     mode: NotRequired[Mode]
-    """ultra: headlines only · fast: headlines and standfirsts (these two cost the least, the same) · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short. Defaults to ``"normal"``."""
+    """ultra: headlines only, the cheapest · fast: headlines and standfirsts · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short. Defaults to ``"normal"``."""
     max_results: NotRequired[int]
     """1–50. Defaults to ``10``."""
     highlights: NotRequired[bool]
@@ -153,7 +161,7 @@ class SiteSearchOptions(TypedDict, total=False):
     exclude_domains: NotRequired[Sequence[str]]
     """Never these domains or paths. At most 20 items."""
     mode: NotRequired[Mode]
-    """ultra: headlines only · fast: headlines and standfirsts (these two cost the least, the same) · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short. Defaults to ``"normal"``."""
+    """ultra: headlines only, the cheapest · fast: headlines and standfirsts · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short. Defaults to ``"normal"``."""
     max_results: NotRequired[int]
     """1–50. Defaults to ``10``."""
     highlights: NotRequired[bool]

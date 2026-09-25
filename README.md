@@ -84,6 +84,25 @@ for group in res.groups or []:
 answers on every result, and `tone`, `dedupe` or `essential` for enrichments — see the
 [guides](https://typesearch.ai/docs/guides/structured-output).
 
+`mode` sets how much is read, and the price: `ultra` (headlines only) is the cheapest, then `fast`,
+`normal` and `deep` — see [modes](https://typesearch.ai/docs/modes) and [pricing](https://typesearch.ai/pricing).
+
+### Filter by country and language
+
+```python
+res = ts.search(
+    "inflation",
+    countries=["AR", "UY"],  # ISO 3166-1 alpha-2
+    languages=["es"],  # ISO 639-1; a tag such as pt-BR counts as pt
+)
+
+for r in res.results:
+    print(r.country, r.language, r.title)
+```
+
+Every result carries the `country` and `language` of its source (`None` when unknown). `similar()` takes
+the same two filters, and `sources()` tells how many sources each country and language has.
+
 ### Stream
 
 ```python

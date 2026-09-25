@@ -17,13 +17,15 @@ with Typesearch() as ts:  # reads TYPESEARCH_API_KEY
         max_results=5,
         days=3,
         # include_domains=["diarioejemplo.example"],
+        # countries=["US", "GB"], languages=["en"],
     )
 
 print(f'{res.total} relevant articles for "{query}" ({res.usage.duration_ms} ms)')
 for r in res.results:
     # score is a calibrated probability: 0.9 means about nine in ten such results are relevant.
     date = r.published_at[:10] if r.published_at else "undated"
-    print(f"{r.score:.2f}  {r.title}  ({r.source or 'unknown source'}, {date})")
+    where = ", ".join(x for x in (r.source or "unknown source", r.country, date) if x)
+    print(f"{r.score:.2f}  {r.title}  ({where})")
     print(f"      {r.url}")
 if not res.found:
     print("Nothing relevant. Closest:", [r.title for r in res.near_misses])

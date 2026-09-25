@@ -3,12 +3,12 @@
   "info": {
     "title": "typesearch · News search API",
     "version": "1.0.0",
-    "description": "News search by topic: across an index of news outlets, on a live site, or for articles similar to a given one, judged by a calibrated relevance model. Compatible endpoints for Perplexity (/compat/perplexity), Exa (/compat/exa) and Tako (/compat/tako): see the migration guides at https://typesearch.ai/docs. Pricing, per 1,000 requests: ultra and fast $1.40, normal $2.20, deep $5.60; similar $2.20 ($4.60 in deep mode); live site search $2.40. Contents, per 1,000 pages: $0.20, or $0.40 with a query. Each query in a multi-query request is billed as one search of its mode; cached results and failed requests are free. The same list, machine-readable, is in `x-pricing`."
+    "description": "News search by topic: across an index of news outlets, on a live site, or for articles similar to a given one, judged by a calibrated relevance model. Compatible endpoints for Perplexity (/compat/perplexity), Exa (/compat/exa) and Tako (/compat/tako): see the migration guides at https://typesearch.ai/docs. For AI agents, a remote MCP server at /mcp (Streamable HTTP; tools search_news, get_contents, find_similar and check_coverage) with the same key and prices. Pricing, per 1,000 requests: ultra $1.00, fast $1.40, normal $2.20, deep $5.60; similar $2.20 ($4.60 in deep mode); live site search $2.40. Contents, per 1,000 pages: $0.20, or $0.40 with a query. Each query in a multi-query request is billed as one search of its mode; cached results and failed requests are free. The same list, machine-readable, is in `x-pricing`."
   },
   "x-pricing": {
     "currency": "USD",
     "per_1000_requests": {
-      "ultra": 1.4,
+      "ultra": 1,
       "fast": 1.4,
       "normal": 2.2,
       "deep": 5.6,
@@ -101,6 +101,26 @@
               "pattern": "^(https?:\\/\\/)?(\\*\\.)?[\\w-]+(\\.[\\w-]+)+(\\/\\S*)?$"
             }
           },
+          "countries": {
+            "description": "Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. GET /v1/sources tells how many sources each country has.",
+            "minItems": 1,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 20
+            }
+          },
+          "languages": {
+            "description": "Only sources that publish in these languages: ISO 639-1 codes, such as es or en (a BCP 47 tag such as pt-BR counts as pt).",
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 35
+            }
+          },
           "sections": {
             "description": "Only these sections: the section in the feed, or the start of the URL path.",
             "maxItems": 20,
@@ -156,7 +176,7 @@
           },
           "mode": {
             "default": "normal",
-            "description": "ultra: headlines only · fast: headlines and standfirsts (these two cost the least, the same) · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short.",
+            "description": "ultra: headlines only, the cheapest · fast: headlines and standfirsts · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short.",
             "type": "string",
             "enum": [
               "ultra",
@@ -449,7 +469,7 @@
           },
           "mode": {
             "default": "normal",
-            "description": "ultra: headlines only · fast: headlines and standfirsts (these two cost the least, the same) · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short.",
+            "description": "ultra: headlines only, the cheapest · fast: headlines and standfirsts · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short.",
             "type": "string",
             "enum": [
               "ultra",
@@ -746,6 +766,26 @@
               "pattern": "^(https?:\\/\\/)?(\\*\\.)?[\\w-]+(\\.[\\w-]+)+(\\/\\S*)?$"
             }
           },
+          "countries": {
+            "description": "Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. GET /v1/sources tells how many sources each country has.",
+            "minItems": 1,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 20
+            }
+          },
+          "languages": {
+            "description": "Only sources that publish in these languages: ISO 639-1 codes, such as es or en (a BCP 47 tag such as pt-BR counts as pt).",
+            "minItems": 1,
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 35
+            }
+          },
           "sections": {
             "description": "Only these sections: the section in the feed, or the start of the URL path.",
             "maxItems": 20,
@@ -801,7 +841,7 @@
           },
           "mode": {
             "default": "normal",
-            "description": "ultra: headlines only · fast: headlines and standfirsts (these two cost the least, the same) · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short.",
+            "description": "ultra: headlines only, the cheapest · fast: headlines and standfirsts · normal: reads the best matches · deep: more headlines, the topic also in other words (synonyms and acronyms), twice the reading, snippets and the essentials of each article, and the search of the sites that cover the topic when the index falls short.",
             "type": "string",
             "enum": [
               "ultra",
@@ -1150,6 +1190,20 @@
                     "null"
                   ]
                 },
+                "country": {
+                  "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "language": {
+                  "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "published_at": {
                   "type": [
                     "string",
@@ -1440,6 +1494,8 @@
                 "url",
                 "title",
                 "source",
+                "country",
+                "language",
                 "published_at",
                 "section",
                 "snippet",
@@ -1492,6 +1548,20 @@
                               "null"
                             ]
                           },
+                          "country": {
+                            "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "language": {
+                            "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "published_at": {
                             "type": [
                               "string",
@@ -1782,6 +1852,8 @@
                           "url",
                           "title",
                           "source",
+                          "country",
+                          "language",
                           "published_at",
                           "section",
                           "snippet",
@@ -1816,6 +1888,20 @@
                               "null"
                             ]
                           },
+                          "country": {
+                            "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "language": {
+                            "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "published_at": {
                             "type": [
                               "string",
@@ -2106,6 +2192,8 @@
                           "url",
                           "title",
                           "source",
+                          "country",
+                          "language",
                           "published_at",
                           "section",
                           "snippet",
@@ -2140,6 +2228,20 @@
                               "null"
                             ]
                           },
+                          "country": {
+                            "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "language": {
+                            "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "published_at": {
                             "type": [
                               "string",
@@ -2430,6 +2532,8 @@
                           "url",
                           "title",
                           "source",
+                          "country",
+                          "language",
                           "published_at",
                           "section",
                           "snippet",
@@ -2802,6 +2906,20 @@
                     "null"
                   ]
                 },
+                "country": {
+                  "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "language": {
+                  "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "published_at": {
                   "type": [
                     "string",
@@ -3092,6 +3210,8 @@
                 "url",
                 "title",
                 "source",
+                "country",
+                "language",
                 "published_at",
                 "section",
                 "snippet",
@@ -3127,6 +3247,20 @@
                     "null"
                   ]
                 },
+                "country": {
+                  "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "language": {
+                  "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
                 "published_at": {
                   "type": [
                     "string",
@@ -3417,6 +3551,8 @@
                 "url",
                 "title",
                 "source",
+                "country",
+                "language",
                 "published_at",
                 "section",
                 "snippet",
@@ -4239,6 +4375,20 @@
                             "null"
                           ]
                         },
+                        "country": {
+                          "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "language": {
+                          "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "published_at": {
                           "type": [
                             "string",
@@ -4529,6 +4679,8 @@
                         "url",
                         "title",
                         "source",
+                        "country",
+                        "language",
                         "published_at",
                         "section",
                         "snippet",
@@ -4581,6 +4733,20 @@
                                       "null"
                                     ]
                                   },
+                                  "country": {
+                                    "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "language": {
+                                    "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
                                   "published_at": {
                                     "type": [
                                       "string",
@@ -4871,6 +5037,8 @@
                                   "url",
                                   "title",
                                   "source",
+                                  "country",
+                                  "language",
                                   "published_at",
                                   "section",
                                   "snippet",
@@ -4905,6 +5073,20 @@
                                       "null"
                                     ]
                                   },
+                                  "country": {
+                                    "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "language": {
+                                    "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
                                   "published_at": {
                                     "type": [
                                       "string",
@@ -5195,6 +5377,8 @@
                                   "url",
                                   "title",
                                   "source",
+                                  "country",
+                                  "language",
                                   "published_at",
                                   "section",
                                   "snippet",
@@ -5229,6 +5413,20 @@
                                       "null"
                                     ]
                                   },
+                                  "country": {
+                                    "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
+                                  "language": {
+                                    "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                                    "type": [
+                                      "string",
+                                      "null"
+                                    ]
+                                  },
                                   "published_at": {
                                     "type": [
                                       "string",
@@ -5519,6 +5717,8 @@
                                   "url",
                                   "title",
                                   "source",
+                                  "country",
+                                  "language",
                                   "published_at",
                                   "section",
                                   "snippet",
@@ -5891,6 +6091,20 @@
                             "null"
                           ]
                         },
+                        "country": {
+                          "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "language": {
+                          "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "published_at": {
                           "type": [
                             "string",
@@ -6181,6 +6395,8 @@
                         "url",
                         "title",
                         "source",
+                        "country",
+                        "language",
                         "published_at",
                         "section",
                         "snippet",
@@ -6216,6 +6432,20 @@
                             "null"
                           ]
                         },
+                        "country": {
+                          "description": "Country of the source (ISO 3166-1 alpha-2), when known.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "language": {
+                          "description": "Language of the source (ISO 639-1), when known: for a source in several languages, the one asked for in `languages`, or its main one.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
                         "published_at": {
                           "type": [
                             "string",
@@ -6506,6 +6736,8 @@
                         "url",
                         "title",
                         "source",
+                        "country",
+                        "language",
                         "published_at",
                         "section",
                         "snippet",
@@ -7480,7 +7712,7 @@
                   },
                   "similar_deep": {
                     "type": "number",
-                    "description": "Similar in deep mode, which reads eight articles with highlights (on Exa: findSimilar plus text and highlights for eight pages)."
+                    "description": "Similar in deep mode, which reads eight articles and returns highlights."
                   },
                   "site_search": {
                     "type": "number"

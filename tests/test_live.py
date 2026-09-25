@@ -2,7 +2,7 @@
 
     TYPESEARCH_LIVE=1 TYPESEARCH_API_KEY=ts_live_… uv run pytest tests/test_live.py -v
 
-Gasta muy poco: dos búsquedas ``fast`` de 3 resultados y el contenido de una URL; ``sources`` y ``usage``
+Gasta muy poco: tres búsquedas ``fast`` de 3 resultados y el contenido de una URL; ``sources`` y ``usage``
 no cobran. Con ``TYPESEARCH_LIVE_FULL=1`` suma ``similar`` y una búsqueda en un sitio en vivo.
 ``TYPESEARCH_BASE_URL`` apunta a otra API (local o de prueba).
 """
@@ -51,6 +51,12 @@ def test_search_and_contents(live: Typesearch, found: list[str]) -> None:
     if found:
         pages = live.contents(found[:1])
         assert pages.results[0].url == found[0]
+
+
+def test_search_by_country_and_language(live: Typesearch) -> None:
+    res = live.search("inflación", mode="fast", max_results=3, days=7, countries=["AR"], languages=["es"])
+    for r in res.results:
+        assert (r.country, r.language) == ("AR", "es")
 
 
 def test_stream(live: Typesearch) -> None:
