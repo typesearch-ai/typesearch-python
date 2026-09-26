@@ -9,7 +9,7 @@ First release.
 
 - `Typesearch` and `AsyncTypesearch` clients for every endpoint of the typesearch API v1: `search`,
   `search_stream`, `similar`, `contents`, `site_search`, `site_search_and_wait`, `site_search_stream`,
-  `jobs.get`, `jobs.wait`, `sources` and `usage`.
+  `jobs.get`, `jobs.wait` and `usage`.
 - Response models (pydantic) and typed keyword arguments (`TypedDict`) generated from the API's OpenAPI
   document. Responses are built without validation and keep unknown fields, so a newer API never breaks
   this version.

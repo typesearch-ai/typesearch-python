@@ -54,7 +54,6 @@ keys on the server: never ship one to a browser or a mobile app.
 | `site_search_and_wait(site, query, **options)` | `POST /v1/search/site` | The same, waiting for the result. |
 | `site_search_stream(site, query, **options)` | `POST /v1/search/site` | The same, as events. |
 | `jobs.get(id)` · `jobs.wait(id)` | `GET /v1/jobs/{id}` | A job's status and result. |
-| `sources()` · `sources(domain=…)` | `GET /v1/sources` | Coverage by country and language, or whether one domain is covered. |
 | `usage()` | `GET /v1/usage` | Usage, limits and credit of your key. |
 
 Keyword arguments have the same names as the [HTTP API](https://typesearch.ai/docs/api-reference) and are
@@ -100,8 +99,9 @@ for r in res.results:
     print(r.country, r.language, r.title)
 ```
 
-Every result carries the `country` and `language` of its source (`None` when unknown). `similar()` takes
-the same two filters, and `sources()` tells how many sources each country and language has.
+Every result carries the `country` and `language` of its source (`None` when unknown), and `similar()` takes
+the same two filters. The index covers news from 130+ countries in 30+ languages. Missing an outlet? Suggest
+it from the [dashboard](https://app.typesearch.ai) (**Suggest a source**) or write to support@typesearch.ai.
 
 ### Stream
 
@@ -147,15 +147,9 @@ done = ts.jobs.wait(job.id, poll_interval=2, timeout=120)
 
 `jobs.wait()` returns the job's result and raises `JobFailedError` if the job fails.
 
-### Coverage and usage
+### Usage
 
 ```python
-coverage = ts.sources()  # sources and articles, by country and language
-
-site = ts.sources(domain="diarioejemplo.example")
-if site.covered:
-    print(site.name, site.articles)
-
 usage = ts.usage()
 print(usage.today.remaining_tokens, usage.limits.requests_per_minute)
 ```

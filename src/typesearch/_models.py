@@ -1,4 +1,4 @@
-# Generado por scripts/generate_models.py desde el OpenAPI de la API (1.0.0, 336df2c4e996).
+# Generado por scripts/generate_models.py desde el OpenAPI de la API (1.0.0, 7de58d27da41).
 # No editar a mano: `python scripts/generate_models.py` (con --fetch trae el vivo).
 """Response models of the typesearch API, generated from its OpenAPI document."""
 
@@ -19,7 +19,6 @@ __all__ = [
     "ContentsResponse",
     "ContentsResult",
     "ContentsUsage",
-    "CountryCoverage",
     "Credit",
     "DateWindow",
     "Diffusion",
@@ -33,7 +32,6 @@ __all__ = [
     "FirstPublication",
     "IndexInfo",
     "Job",
-    "LanguageCoverage",
     "Mode",
     "PagePricing",
     "Pricing",
@@ -49,9 +47,7 @@ __all__ = [
     "ScoreAnswer",
     "SearchResponse",
     "SearchUsage",
-    "Source",
     "SourceTone",
-    "Sources",
     "ToneCounts",
     "ToneSummary",
     "Usage",
@@ -305,9 +301,8 @@ class Reference(_Model):
 
 
 class IndexInfo(_Model):
-    sources: int
-    articles: int
     updated_at: Optional[str]
+    """The oldest last refresh among the sources searched: how fresh the index was for this request."""
 
 
 class SearchUsage(_Model):
@@ -403,42 +398,6 @@ class Job(_Model):
     """The problem details, if the job failed."""
 
 
-class Sources(_Model):
-    object: Literal["sources"]
-    updated_at: Optional[str]
-    """The oldest last ingestion across the index: its freshness is that of its most stale source."""
-    total: int
-    """Sources in the index."""
-    articles: int
-    """Articles in the whole index."""
-    by_country: List[CountryCoverage]
-    by_language: List[LanguageCoverage]
-
-
-class CountryCoverage(_Model):
-    country: Optional[str]
-    """ISO 3166 alpha-2; null for international sources."""
-    sources: int
-
-
-class LanguageCoverage(_Model):
-    language: str
-    """ISO 639-1."""
-    sources: int
-
-
-class Source(_Model):
-    object: Literal["source"]
-    domain: str
-    covered: bool
-    """Whether the domain is in the index and available."""
-    name: Optional[str] = None
-    country: Optional[str] = None
-    languages: Optional[List[str]] = None
-    articles: Optional[int] = None
-    last_refreshed_at: Optional[str] = None
-
-
 class Usage(_Model):
     object: Literal["usage"]
     key: UsageKey
@@ -514,5 +473,5 @@ Answer = Union[BooleanAnswer, ChoiceAnswer, ScoreAnswer]
 ContentsError = ResponseWarning
 
 
-for _model in (SearchResponse, Result, Reading, ResultTone, Answers, BooleanAnswer, ChoiceAnswer, ScoreAnswer, Duplicate, QueryGroup, Diffusion, DiffusionDay, DiffusionSource, FirstPublication, ToneSummary, ToneCounts, SourceTone, Essential, EssentialExcerpt, QueryDate, DateWindow, Reference, IndexInfo, SearchUsage, Budget, Discovery, ResponseWarning, ContentsResponse, ContentsResult, ContentsUsage, Problem, FieldError, Job, Sources, CountryCoverage, LanguageCoverage, Source, Usage, UsageKey, UsageLimits, UsageToday, UsagePeriod, Credit, Pricing, RequestPricing, PagePricing,):
+for _model in (SearchResponse, Result, Reading, ResultTone, Answers, BooleanAnswer, ChoiceAnswer, ScoreAnswer, Duplicate, QueryGroup, Diffusion, DiffusionDay, DiffusionSource, FirstPublication, ToneSummary, ToneCounts, SourceTone, Essential, EssentialExcerpt, QueryDate, DateWindow, Reference, IndexInfo, SearchUsage, Budget, Discovery, ResponseWarning, ContentsResponse, ContentsResult, ContentsUsage, Problem, FieldError, Job, Usage, UsageKey, UsageLimits, UsageToday, UsagePeriod, Credit, Pricing, RequestPricing, PagePricing,):
     _model.model_rebuild()

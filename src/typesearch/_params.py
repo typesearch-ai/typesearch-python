@@ -1,4 +1,4 @@
-# Generado por scripts/generate_models.py desde el OpenAPI de la API (1.0.0, 336df2c4e996).
+# Generado por scripts/generate_models.py desde el OpenAPI de la API (1.0.0, 7de58d27da41).
 # No editar a mano: `python scripts/generate_models.py` (con --fetch trae el vivo).
 """Request options of the typesearch API, generated from its OpenAPI document."""
 
@@ -43,13 +43,13 @@ class SearchOptions(TypedDict, total=False):
     """Keyword arguments of ``search()`` and ``search_stream()``: every field of ``POST /v1/search`` but ``query``."""
 
     sources: NotRequired[Sequence[str]]
-    """Only these index sources, by domain, such as example.com. GET /v1/sources?domain=… tells you whether a domain is covered. 1–100 items."""
+    """Only these index sources, by domain, such as example.com. A domain that is not in the index comes back as a domain_not_indexed warning. 1–100 items."""
     include_domains: NotRequired[Sequence[str]]
     """Only these domains or paths. A domain includes its subdomains. At most 20 items."""
     exclude_domains: NotRequired[Sequence[str]]
     """Never these domains or paths. At most 20 items."""
     countries: NotRequired[Sequence[str]]
-    """Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. GET /v1/sources tells how many sources each country has. 1–50 items."""
+    """Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. 1–50 items."""
     languages: NotRequired[Sequence[str]]
     """Only sources that publish in these languages: ISO 639-1 codes, such as es or en (a BCP 47 tag such as pt-BR counts as pt). 1–20 items."""
     sections: NotRequired[Sequence[str]]
@@ -112,13 +112,13 @@ class SimilarOptions(TypedDict, total=False):
     """Keyword arguments of ``similar()``: every field of ``POST /v1/similar`` but ``url``."""
 
     sources: NotRequired[Sequence[str]]
-    """Only these index sources, by domain, such as example.com. GET /v1/sources?domain=… tells you whether a domain is covered. 1–100 items."""
+    """Only these index sources, by domain, such as example.com. A domain that is not in the index comes back as a domain_not_indexed warning. 1–100 items."""
     include_domains: NotRequired[Sequence[str]]
     """Only these domains or paths. A domain includes its subdomains. At most 20 items."""
     exclude_domains: NotRequired[Sequence[str]]
     """Never these domains or paths. At most 20 items."""
     countries: NotRequired[Sequence[str]]
-    """Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. GET /v1/sources tells how many sources each country has. 1–50 items."""
+    """Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. 1–50 items."""
     languages: NotRequired[Sequence[str]]
     """Only sources that publish in these languages: ISO 639-1 codes, such as es or en (a BCP 47 tag such as pt-BR counts as pt). 1–20 items."""
     sections: NotRequired[Sequence[str]]

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from typesearch import APIConnectionError, AsyncSearchStream, AsyncTypesearch, BudgetError, JobFailedError, TypesearchError
-from typesearch.types import SearchResponse, Source, Sources
+from typesearch.types import SearchResponse
 
 from .fake_api import KEY, STEP, FakeApi, Scripted, problem
 
@@ -20,10 +20,6 @@ async def test_endpoints(api: FakeApi, ats: AsyncTypesearch) -> None:
 
     pages = await ats.contents("https://reddiaria.example/economia/a", query="el Presupuesto 2027")
     assert pages.results[0].relevance == 0.97
-
-    assert isinstance(await ats.sources(), Sources)
-    site = await ats.sources(domain="diarioejemplo.example")
-    assert isinstance(site, Source) and site.covered
 
     assert (await ats.usage()).today.remaining_tokens == 816080
 

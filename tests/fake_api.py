@@ -86,7 +86,7 @@ def search_response(**extra: Any) -> Dict[str, Any]:
         "reference": None,
         "temporal": None,
         "site": None,
-        "index": {"sources": 3, "articles": 1200, "updated_at": "2026-09-22T14:05:02.000Z"},
+        "index": None,
         "usage": {
             "tokens": 1840,
             "calls": 2,
@@ -258,8 +258,6 @@ class FakeApi:
             return self._contents(h, body)
         if h.command == "GET" and url.path.startswith("/v1/jobs/"):
             return self._job(h, unquote(url.path[len("/v1/jobs/") :]))
-        if ruta == "GET /v1/sources":
-            return self._sources(h, parse_qs(url.query))
         if ruta == "GET /v1/usage":
             return self._json(h, 200, usage(), "Usage")
         return self._json(h, 404, problem(404, "not_found"), "Problem")
@@ -350,32 +348,6 @@ class FakeApi:
             "usage": {"tokens": 1320, "calls": 1, "cost_usd": 0, "duration_ms": 1840},
         }
         self._json(h, 200, out, "ContentsResponse")
-
-    def _sources(self, h: BaseHTTPRequestHandler, q: Dict[str, List[str]]) -> None:
-        domain = q.get("domain", [None])[0]
-        if domain is None:
-            out = {
-                "object": "sources",
-                "updated_at": "2026-09-22T14:05:02.000Z",
-                "total": 3,
-                "articles": 1200,
-                "by_country": [{"country": "AR", "sources": 3}],
-                "by_language": [{"language": "es", "sources": 3}],
-            }
-            return self._json(h, 200, out, "Sources")
-        if domain == "diarioejemplo.example":
-            out = {
-                "object": "source",
-                "domain": domain,
-                "covered": True,
-                "name": "Diario Ejemplo",
-                "country": "AR",
-                "languages": ["es"],
-                "articles": 1520,
-                "last_refreshed_at": "2026-09-22T14:05:02.000Z",
-            }
-            return self._json(h, 200, out, "Source")
-        self._json(h, 200, {"object": "source", "domain": domain, "covered": False}, "Source")
 
     # --- Salida --------------------------------------------------------------------------
 

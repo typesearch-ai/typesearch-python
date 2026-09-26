@@ -3,7 +3,7 @@
   "info": {
     "title": "typesearch · News search API",
     "version": "1.0.0",
-    "description": "News search by topic: across an index of news outlets, on a live site, or for articles similar to a given one, judged by a calibrated relevance model. Compatible endpoints for Perplexity (/compat/perplexity), Exa (/compat/exa) and Tako (/compat/tako): see the migration guides at https://typesearch.ai/docs. For AI agents, a remote MCP server at /mcp (Streamable HTTP; tools search_news, get_contents, find_similar and check_coverage) with the same key and prices. Pricing, per 1,000 requests: ultra $1.00, fast $1.40, normal $2.20, deep $5.60; similar $2.20 ($4.60 in deep mode); live site search $2.40. Contents, per 1,000 pages: $0.20, or $0.40 with a query. Each query in a multi-query request is billed as one search of its mode; cached results and failed requests are free. The same list, machine-readable, is in `x-pricing`."
+    "description": "News search by topic: across an index of news outlets, on a live site, or for articles similar to a given one, judged by a calibrated relevance model. Compatible endpoints for Perplexity (/compat/perplexity), Exa (/compat/exa) and Tako (/compat/tako): see the migration guides at https://typesearch.ai/docs. For AI agents, a remote MCP server at /mcp (Streamable HTTP; tools search_news, get_contents and find_similar) with the same key and prices. Pricing, per 1,000 requests: ultra $1.00, fast $1.40, normal $2.20, deep $5.60; similar $2.20 ($4.60 in deep mode); live site search $2.40. Contents, per 1,000 pages: $0.20, or $0.40 with a query. Each query in a multi-query request is billed as one search of its mode; cached results and failed requests are free. The same list, machine-readable, is in `x-pricing`."
   },
   "x-pricing": {
     "currency": "USD",
@@ -71,7 +71,7 @@
             "description": "One query, or up to 5 judged together."
           },
           "sources": {
-            "description": "Only these index sources, by domain, such as example.com. GET /v1/sources?domain=… tells you whether a domain is covered.",
+            "description": "Only these index sources, by domain, such as example.com. A domain that is not in the index comes back as a domain_not_indexed warning.",
             "minItems": 1,
             "maxItems": 100,
             "type": "array",
@@ -102,7 +102,7 @@
             }
           },
           "countries": {
-            "description": "Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. GET /v1/sources tells how many sources each country has.",
+            "description": "Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US.",
             "minItems": 1,
             "maxItems": 50,
             "type": "array",
@@ -736,7 +736,7 @@
             "format": "uri"
           },
           "sources": {
-            "description": "Only these index sources, by domain, such as example.com. GET /v1/sources?domain=… tells you whether a domain is covered.",
+            "description": "Only these index sources, by domain, such as example.com. A domain that is not in the index comes back as a domain_not_indexed warning.",
             "minItems": 1,
             "maxItems": 100,
             "type": "array",
@@ -767,7 +767,7 @@
             }
           },
           "countries": {
-            "description": "Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US. GET /v1/sources tells how many sources each country has.",
+            "description": "Only sources from these countries: ISO 3166-1 alpha-2 codes, such as AR or US.",
             "minItems": 1,
             "maxItems": 50,
             "type": "array",
@@ -3921,17 +3921,8 @@
               {
                 "type": "object",
                 "properties": {
-                  "sources": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  "articles": {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
                   "updated_at": {
+                    "description": "The oldest last refresh among the sources searched: how fresh the index was for this request.",
                     "type": [
                       "string",
                       "null"
@@ -3939,8 +3930,6 @@
                   }
                 },
                 "required": [
-                  "sources",
-                  "articles",
                   "updated_at"
                 ],
                 "additionalProperties": false
@@ -7106,17 +7095,8 @@
                       {
                         "type": "object",
                         "properties": {
-                          "sources": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
-                          "articles": {
-                            "type": "integer",
-                            "minimum": -9007199254740991,
-                            "maximum": 9007199254740991
-                          },
                           "updated_at": {
+                            "description": "The oldest last refresh among the sources searched: how fresh the index was for this request.",
                             "type": [
                               "string",
                               "null"
@@ -7124,8 +7104,6 @@
                           }
                         },
                         "required": [
-                          "sources",
-                          "articles",
                           "updated_at"
                         ],
                         "additionalProperties": false
@@ -7398,141 +7376,6 @@
           "finished_at",
           "result",
           "error"
-        ],
-        "additionalProperties": false
-      },
-      "Sources": {
-        "type": "object",
-        "properties": {
-          "object": {
-            "type": "string",
-            "const": "sources"
-          },
-          "updated_at": {
-            "description": "The oldest last ingestion across the index: its freshness is that of its most stale source.",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "total": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Sources in the index."
-          },
-          "articles": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991,
-            "description": "Articles in the whole index."
-          },
-          "by_country": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "country": {
-                  "description": "ISO 3166 alpha-2; null for international sources.",
-                  "type": [
-                    "string",
-                    "null"
-                  ]
-                },
-                "sources": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
-              },
-              "required": [
-                "country",
-                "sources"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "by_language": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "language": {
-                  "type": "string",
-                  "description": "ISO 639-1."
-                },
-                "sources": {
-                  "type": "integer",
-                  "minimum": -9007199254740991,
-                  "maximum": 9007199254740991
-                }
-              },
-              "required": [
-                "language",
-                "sources"
-              ],
-              "additionalProperties": false
-            }
-          }
-        },
-        "required": [
-          "object",
-          "updated_at",
-          "total",
-          "articles",
-          "by_country",
-          "by_language"
-        ],
-        "additionalProperties": false
-      },
-      "Source": {
-        "type": "object",
-        "properties": {
-          "object": {
-            "type": "string",
-            "const": "source"
-          },
-          "domain": {
-            "type": "string"
-          },
-          "covered": {
-            "type": "boolean",
-            "description": "Whether the domain is in the index and available."
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "country": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "languages": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "articles": {
-            "type": "integer",
-            "minimum": -9007199254740991,
-            "maximum": 9007199254740991
-          },
-          "last_refreshed_at": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "required": [
-          "object",
-          "domain",
-          "covered"
         ],
         "additionalProperties": false
       },
@@ -8056,64 +7899,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ContentsResponse"
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment required: `insufficient_credits` (no credit left), `spend_limit_reached` (the key hit its monthly limit) or `budget_too_small`.",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
-          "default": {
-            "description": "Error (RFC 9457). In English unless the request sends `Accept-Language: es`.",
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/v1/sources": {
-      "get": {
-        "summary": "Get the index coverage, or check one domain",
-        "description": "The coverage of the index in numbers: how many sources and articles, by country and by language. We don’t publish the list of sources. With `domain`, whether that domain is covered (a `Source`). To find outlets beyond the index, discovery also uses an open news index. Open news index built from the GDELT Project (gdeltproject.org).",
-        "parameters": [
-          {
-            "name": "domain",
-            "in": "query",
-            "required": false,
-            "description": "One domain, such as example.com: whether it is covered.",
-            "schema": {
-              "type": "string",
-              "minLength": 3,
-              "maxLength": 300
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The coverage (`Sources`), or one domain (`Source`) with `domain`.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/Sources"
-                    },
-                    {
-                      "$ref": "#/components/schemas/Source"
-                    }
-                  ]
                 }
               }
             }

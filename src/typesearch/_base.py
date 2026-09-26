@@ -6,7 +6,7 @@ import datetime as dt
 import os
 import random
 from typing import Any, Dict, Mapping, Optional, Sequence, Union
-from urllib.parse import quote, urlencode
+from urllib.parse import quote
 
 import httpx
 
@@ -109,10 +109,6 @@ def _json(key: str, value: Any) -> Any:
 
 def as_list(value: Union[str, Sequence[str]]) -> Any:
     return [value] if isinstance(value, str) else list(value)
-
-
-def sources_path(domain: Optional[str]) -> str:
-    return "/v1/sources" if domain is None else f"/v1/sources?{urlencode({'domain': domain})}"
 
 
 def job_path(job_id: str) -> str:

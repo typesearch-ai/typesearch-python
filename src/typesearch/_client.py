@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 from types import TracebackType
-from typing import Any, Dict, Mapping, Optional, Sequence, Type, TypeVar, Union, overload
+from typing import Any, Dict, Mapping, Optional, Sequence, Type, TypeVar, Union
 
 import httpx
 from pydantic import BaseModel
@@ -19,7 +19,6 @@ from ._base import (
     job_path,
     retry_delay,
     should_retry,
-    sources_path,
 )
 from ._construct import construct
 from ._errors import (
@@ -31,7 +30,7 @@ from ._errors import (
     error_from_response,
     retry_after_seconds,
 )
-from ._models import ContentsResponse, Job, SearchResponse, Source, Sources, Usage
+from ._models import ContentsResponse, Job, SearchResponse, Usage
 from ._params import ContentsOptions, SearchOptions, SimilarOptions, SiteSearchOptions
 from ._streaming import SearchStream
 
@@ -183,26 +182,6 @@ class Typesearch(BaseClient):
         data = body({"site": site, "query": query}, options)
         data["stream"] = True
         return SearchStream(lambda: self._send("POST", "/v1/search/site", data, True, timeout, max_retries, extra_headers))
-
-    @overload
-    def sources(self, *, timeout: Optional[float] = None, extra_headers: Optional[Mapping[str, str]] = None) -> Sources: ...
-
-    @overload
-    def sources(self, *, domain: str, timeout: Optional[float] = None, extra_headers: Optional[Mapping[str, str]] = None) -> Source: ...
-
-    def sources(
-        self,
-        *,
-        domain: Optional[str] = None,
-        timeout: Optional[float] = None,
-        extra_headers: Optional[Mapping[str, str]] = None,
-    ) -> Union[Sources, Source]:
-        """The coverage of the index in aggregate: sources and articles, by country and by language.
-
-        With ``domain``, whether that domain is covered and, when it is, its name, country, languages and articles.
-        """
-        model: Type[Union[Sources, Source]] = Sources if domain is None else Source
-        return self._get(sources_path(domain), model, timeout, extra_headers)
 
     def usage(self, *, timeout: Optional[float] = None, extra_headers: Optional[Mapping[str, str]] = None) -> Usage:
         """Usage today and over the last 30 days, the limits of this key, its credit and the price list."""

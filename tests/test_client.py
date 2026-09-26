@@ -15,7 +15,7 @@ from typesearch import (
     Typesearch,
     TypesearchError,
 )
-from typesearch.types import Result, SearchResponse, Source, Sources
+from typesearch.types import Result, SearchResponse
 
 from .fake_api import KEY, FakeApi
 
@@ -185,18 +185,9 @@ def test_an_unknown_job_is_not_found_and_the_id_is_escaped(api: FakeApi, ts: Typ
     assert api.last.path == "/v1/jobs/job_nope%2F..%2Fx"
 
 
-def test_sources(api: FakeApi, ts: Typesearch) -> None:
-    coverage = ts.sources()
-    assert isinstance(coverage, Sources)
-    assert api.last.query == {}
-    assert coverage.by_country[0].country == "AR"
-    yes = ts.sources(domain="diarioejemplo.example")
-    assert isinstance(yes, Source)
-    assert yes.covered and yes.name == "Diario Ejemplo"
-    no = ts.sources(domain="otro diario.example")
-    assert api.last.query == {"domain": ["otro diario.example"]}
-    assert no.covered is False
-    assert no.name is None
+def test_the_index_coverage_is_not_part_of_the_public_api() -> None:
+    assert not hasattr(Typesearch, "sources")
+    assert not hasattr(typesearch.AsyncTypesearch, "sources")
 
 
 def test_usage(api: FakeApi, ts: Typesearch) -> None:
