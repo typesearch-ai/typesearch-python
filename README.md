@@ -215,8 +215,8 @@ res = ts.search("el dólar", mode="deep", timeout=90, max_retries=0, extra_heade
 
 ## Examples
 
-[`examples/`](examples) has three short scripts: [search](examples/search.py),
-[contents](examples/contents.py) and [streaming](examples/stream.py).
+[`examples/`](https://github.com/typesearch-ai/typesearch-python/tree/main/examples) has three short scripts: [search](https://github.com/typesearch-ai/typesearch-python/blob/main/examples/search.py),
+[contents](https://github.com/typesearch-ai/typesearch-python/blob/main/examples/contents.py) and [streaming](https://github.com/typesearch-ai/typesearch-python/blob/main/examples/stream.py).
 
 ## Development
 
@@ -230,4 +230,4 @@ TYPESEARCH_LIVE=1 uv run pytest tests/test_live.py # against the real API: needs
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/typesearch-ai/typesearch-python/blob/main/LICENSE)

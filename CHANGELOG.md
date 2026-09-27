@@ -3,7 +3,7 @@
 All notable changes to `typesearch` are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-09-27
 
 First release.
 
@@ -20,3 +20,5 @@ First release.
 - Per-call `timeout`, `max_retries` and `extra_headers`.
 - Typed errors: `APIError` and its subclasses by status, `APIConnectionError`, `APITimeoutError`,
   `JobFailedError`.
+
+[0.1.0]: https://github.com/typesearch-ai/typesearch-python/releases/tag/v0.1.0

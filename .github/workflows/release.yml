@@ -1,5 +1,5 @@
 # Publishes to PyPI when a GitHub release is published (tag v<version>), with trusted publishing (OIDC):
-# no token is stored. Configure the publisher on PyPI first (see PUBLICAR.md); a pending publisher works
+# no token is stored. Configure the publisher on PyPI first (see PUBLICAR.md, or PUBLISHING.md in English); a pending publisher works
 # before the project exists.
 name: Release
 
